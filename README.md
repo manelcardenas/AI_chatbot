@@ -85,3 +85,7 @@ The project uses Ruff for linting and formatting:
 ruff check .   # Run linting
 ruff format .  # Run formatting
 ```
+
+
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/manelcardenas/chatbot_poc)
