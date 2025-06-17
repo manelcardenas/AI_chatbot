@@ -5,7 +5,7 @@ from langchain_core.tools import tool
 DB_PATH = "data.db"
 
 
-def get_db_connection() -> None:
+def get_db_connection() -> sqlite3.Connection:
     """Creates and returns a database connection."""
     # TODO: This does not go here. Move it in the future
     try:
