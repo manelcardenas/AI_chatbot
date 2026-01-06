@@ -10,10 +10,7 @@ wheels/
 .env
 
 # Virtual environments
-.venv
+.venv/
 
-# Database
-data.db
-
-# Checkpoints
-checkpoints/
+# docs
+docs/
