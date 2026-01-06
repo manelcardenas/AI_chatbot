@@ -42,7 +42,7 @@ class BaseConfiguration:
 class AgentConfiguration(BaseConfiguration):
     query_model: str = "anthropic/claude-3-5-haiku-20241022"
     response_model: str = "anthropic/claude-3-5-haiku-20241022"
-    
+
     # Prompts (pulled from LangSmith at import time)
     router_system_prompt: str = field(default=prompts.ROUTER_SYSTEM_PROMPT)
     research_plan_system_prompt: str = field(default=prompts.RESEARCH_PLAN_SYSTEM_PROMPT)
@@ -69,7 +69,7 @@ def from_runnable_config(cls, config: RunnableConfig) -> T:
 async def respond(state: AgentState, *, config: RunnableConfig):
     # Extract configuration
     configuration = AgentConfiguration.from_runnable_config(config)
-    
+
     # Use configured model
     model = load_chat_model(configuration.response_model)
 ```
@@ -153,7 +153,7 @@ def load_langchain_python_docs():
 def metadata_extractor(meta: dict, soup: BeautifulSoup, title_suffix: str = None) -> dict:
     title_element = soup.find("title")
     description_element = soup.find("meta", attrs={"name": "description"})
-    
+
     return {
         "source": meta["loc"],        # URL
         "title": title_element.get_text() if title_element else "",
@@ -236,7 +236,7 @@ def langchain_docs_extractor(soup: BeautifulSoup) -> str:
     # Remove non-content elements
     SCAPE_TAGS = ["nav", "footer", "aside", "script", "style"]
     [tag.decompose() for tag in soup.find_all(SCAPE_TAGS)]
-    
+
     def get_text(tag: Tag) -> Generator[str, None, None]:
         for child in tag.children:
             if isinstance(child, NavigableString):
@@ -303,7 +303,7 @@ def make_retriever(config: RunnableConfig) -> Iterator[BaseRetriever]:
     """Create a retriever based on configuration."""
     configuration = BaseConfiguration.from_runnable_config(config)
     embedding_model = make_text_encoder(configuration.embedding_model)
-    
+
     match configuration.retriever_provider:
         case "weaviate":
             with make_weaviate_retriever(configuration, embedding_model) as retriever:
@@ -412,31 +412,31 @@ def reduce_docs(
     new: Union[list[Document], list[dict], list[str], str, Literal["delete"]],
 ) -> list[Document]:
     """Merge documents with deduplication."""
-    
+
     # Special case: clear all documents
     if new == "delete":
         return []
-    
+
     existing_list = list(existing) if existing else []
-    
+
     # Track existing UUIDs to prevent duplicates
     existing_ids = set(doc.metadata.get("uuid") for doc in existing_list)
-    
+
     new_list = []
     for item in new:
         if isinstance(item, Document):
             item_id = item.metadata.get("uuid")
-            
+
             # Assign UUID if missing
             if item_id is None:
                 item_id = str(uuid.uuid4())
                 item.metadata["uuid"] = item_id
-            
+
             # Only add if not duplicate
             if item_id not in existing_ids:
                 new_list.append(item)
                 existing_ids.add(item_id)
-    
+
     return existing_list + new_list
 ```
 
@@ -475,7 +475,7 @@ Converts documents to XML format for inclusion in prompts:
 def format_docs(docs: Optional[list[Document]]) -> str:
     if not docs:
         return "<documents></documents>"
-    
+
     formatted = "\n".join(_format_doc(doc) for doc in docs)
     return f"<documents>\n{formatted}\n</documents>"
 
@@ -508,18 +508,18 @@ LCEL supports streaming out of the box...
 ```python
 def load_chat_model(fully_specified_name: str) -> BaseChatModel:
     """Load any chat model using provider/model format."""
-    
+
     if "/" in fully_specified_name:
         provider, model = fully_specified_name.split("/", maxsplit=1)
     else:
         provider, model = "", fully_specified_name
-    
+
     model_kwargs = {"temperature": 0, "stream_usage": True}
-    
+
     # Provider-specific adjustments
     if provider == "google_genai":
         model_kwargs["convert_system_message_to_human"] = True
-    
+
     return init_chat_model(model, model_provider=provider, **model_kwargs)
 ```
 
@@ -652,7 +652,7 @@ def make_retriever(config) -> Iterator[BaseRetriever]:
 @dataclass
 class Configuration:
     model: str = "default"
-    
+
     @classmethod
     def from_runnable_config(cls, config: RunnableConfig) -> "Configuration":
         configurable = config.get("configurable") or {}
