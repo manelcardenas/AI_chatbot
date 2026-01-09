@@ -1,3 +1,5 @@
+from collections.abc import Sequence
+
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_openai import ChatOpenAI
 
@@ -23,9 +25,9 @@ class ChatOpenAIModel(ModelPort):
         )
         return cls(model=model)
 
-    def bind_tools(self, tools: list[BindableTool]) -> None:
-        # TDB
-        pass
+    def bind_tools(self, tools: Sequence[BindableTool]) -> "ChatOpenAIModel":
+        self._bound = self._model.bind_tools(tools)
+        return self
 
     async def ainvoke(self, messages: list) -> object:
         response = await self._bound.ainvoke(messages)

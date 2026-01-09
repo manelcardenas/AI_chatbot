@@ -1,3 +1,5 @@
+from collections.abc import Sequence
+
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_google_genai import ChatGoogleGenerativeAI
 
@@ -25,9 +27,9 @@ class ChatGoogleGenerativeAIModel(ModelPort):
         )
         return cls(model=model)
 
-    def bind_tools(self, tools: list[BindableTool]) -> None:
-        # TDB
-        pass
+    def bind_tools(self, tools: Sequence[BindableTool]) -> "ChatGoogleGenerativeAIModel":
+        self._bound = self._model.bind_tools(tools)
+        return self
 
     async def ainvoke(self, messages: list) -> object:
         response = await self._bound.ainvoke(messages)

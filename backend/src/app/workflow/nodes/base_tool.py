@@ -20,4 +20,6 @@ class AgenticNode(BaseNode):
         self.tools = tools
         self.model = model
         self.prompts = prompts
-        self.model.bind_tools(tools)
+        self.model = self.model.bind_tools(tools)
+
+    async def ainvoke(self, state: ChatbotState) -> ChatbotState: ...
