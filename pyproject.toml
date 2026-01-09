@@ -6,14 +6,14 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "langchain-core>=1.2.1",
+    "langchain-google-genai>=4.0.0",
+    "langchain-openai>=1.1.4",
+    "langgraph>=1.0.5",
     "langsmith>=0.4.60",
 ]
 
 [dependency-groups]
-dev = [
-    "pre-commit>=4.5.0",
-    "ruff>=0.14.9",
-]
+dev = ["pre-commit>=4.5.0", "ruff>=0.14.9"]
 
 
 [tool.setuptools]
@@ -26,7 +26,7 @@ line-length = 120
 target-version = "py311"
 
 lint.select = ["E", "F", "W", "I", "ANN", "UP"]
-lint.ignore = ["E501", "E203"]
+lint.ignore = ["ANN002", "ANN003", "E501", "E203"]
 lint.exclude = [".venv", "__pycache__", ".git"]
 
 # Code formatting
