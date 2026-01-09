@@ -4,7 +4,13 @@ version = "0.1.0"
 description = "A proof of concept chatbot application"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = ["langchain-core>=1.2.1", "langsmith>=0.4.60"]
+dependencies = [
+    "langchain-core>=1.2.1",
+    "langchain-google-genai>=4.0.0",
+    "langchain-openai>=1.1.4",
+    "langgraph>=1.0.5",
+    "langsmith>=0.4.60",
+]
 
 [dependency-groups]
 dev = ["pre-commit>=4.5.0", "ruff>=0.14.9"]
