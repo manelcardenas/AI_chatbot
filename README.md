@@ -6,10 +6,6 @@ A proof of concept chatbot application built with LangChain and OpenAI.
 
 This project provides a simple chatbot proof of concept using LangChain and OpenAI's models.
 
-### Graph architecture
-
-![Graph](graph.webp)
-
 ## Prerequisites
 
 - Python 3.11 or higher
