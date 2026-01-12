@@ -2,6 +2,7 @@ from collections.abc import Sequence
 
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_google_genai import ChatGoogleGenerativeAI
+from pydantic import BaseModel
 
 from backend.src.domain.ports.model_port import BindableTool, ModelPort
 from backend.src.infra.models.model_names import ModelName
@@ -28,8 +29,14 @@ class ChatGoogleGenerativeAIModel(ModelPort):
         return cls(model=model)
 
     def bind_tools(self, tools: Sequence[BindableTool]) -> "ChatGoogleGenerativeAIModel":
-        self._bound = self._model.bind_tools(tools)
-        return self
+        new_instance = ChatGoogleGenerativeAIModel(self._model)
+        new_instance._bound = self._model.bind_tools(tools)
+        return new_instance
+
+    def with_structured_output(self, schema: type[BaseModel]) -> "ChatGoogleGenerativeAIModel":
+        new_instance = ChatGoogleGenerativeAIModel(self._model)
+        new_instance._bound = self._model.with_structured_output(schema)
+        return new_instance
 
     async def ainvoke(self, messages: list) -> object:
         response = await self._bound.ainvoke(messages)
