@@ -561,44 +561,81 @@ async def chat(request: Request):
 
 ---
 
-## File Structure (Proposed)
+## File Structure (Hexagonal Architecture)
+
+The project follows **hexagonal architecture** (ports & adapters) to separate business logic from framework-specific implementations:
 
 ```
 ai_chatbot/
 ├── backend/
 │   ├── src/
 │   │   ├── __init__.py
-│   │   ├── main.py              # FastAPI app
-│   │   ├── config.py            # Settings (env vars)
-│   │   ├── database.py          # SQLAlchemy + pgvector
-│   │   ├── embeddings.py        # OpenAI embeddings
-│   │   ├── retrieval.py         # pgvector retriever
-│   │   ├── prompts.py           # System prompts (local)
-│   │   ├── utils.py             # format_docs, etc.
+│   │   ├── main.py                    # FastAPI app entry point
 │   │   │
-│   │   └── graph/
-│   │       ├── __init__.py
-│   │       ├── retrieval_graph.py   # Parent graph
-│   │       ├── researcher_graph.py  # Child graph
-│   │       └── state.py             # State definitions
+│   │   ├── app/                       # APPLICATION LAYER
+│   │   │   │                          # (Use cases, orchestration logic)
+│   │   │   ├── __init__.py
+│   │   │   ├── state.py               # State definitions (AgentState, ResearcherState)
+│   │   │   │
+│   │   │   └── workflow/              # Graph node logic (framework-agnostic)
+│   │   │       ├── __init__.py
+│   │   │       ├── nodes/             # Node functions
+│   │   │       │   ├── __init__.py
+│   │   │       │   ├── create_research_plan.py
+│   │   │       │   ├── conduct_research.py
+│   │   │       │   ├── respond.py
+│   │   │       │   ├── generate_queries.py
+│   │   │       │   └── retrieve_documents.py
+│   │   │       ├── prompts/           # System prompts
+│   │   │       │   ├── __init__.py
+│   │   │       │   └── retrieval_prompts.py
+│   │   │       └── utils/             # Shared utilities
+│   │   │           ├── __init__.py
+│   │   │           ├── reduce_docs.py
+│   │   │           └── format_docs.py
+│   │   │
+│   │   ├── domain/                    # DOMAIN LAYER
+│   │   │   │                          # (Business logic, interfaces/ports)
+│   │   │   └── ports/
+│   │   │       ├── __init__.py
+│   │   │       ├── model_port.py      # LLM interface
+│   │   │       └── retriever_port.py  # Vector store interface
+│   │   │
+│   │   └── infra/                     # INFRASTRUCTURE LAYER
+│   │       │                          # (Framework-specific adapters)
+│   │       ├── models/                # LLM adapters
+│   │       │   ├── __init__.py
+│   │       │   ├── model_factory.py
+│   │       │   ├── openai_model.py
+│   │       │   └── gemini_model.py
+│   │       ├── retrievers/            # Vector store adapters
+│   │       │   ├── __init__.py
+│   │       │   └── pgvector_retriever.py
+│   │       └── graphs/                # LangGraph wiring (framework-specific)
+│   │           ├── __init__.py
+│   │           ├── retrieval_graph.py
+│   │           └── researcher_graph.py
 │   │
-│   ├── ingest/
+│   ├── ingest/                        # Ingestion pipeline
 │   │   ├── __init__.py
-│   │   ├── loader.py            # SitemapLoader or custom
-│   │   ├── parser.py            # HTML → Markdown
-│   │   └── indexer.py           # Chunking + embedding + store
+│   │   ├── loader.py
+│   │   ├── parser.py
+│   │   └── indexer.py
 │   │
 │   └── tests/
 │       ├── test_api.py
 │       ├── test_graph.py
 │       └── test_ingestion.py
 │
-├── frontend/                    # Forked from chat-langchain
+├── docs/                              # Documentation
+│   ├── graph-state-flow.md            # State flow walkthrough
+│   └── ...
+│
+├── frontend/                          # Forked from chat-langchain
 │   └── ...
 │
 ├── infrastructure/
-│   ├── terraform/               # Or CDK
-│   │   ├── main.tf
+│   ├── terraform/
 │   │   └── ...
 │   └── docker/
 │       └── Dockerfile
@@ -615,8 +652,20 @@ ai_chatbot/
 ├── README.md
 ├── architecture.md
 ├── implementation-guide.md
-└── PROJECT-SPEC.md              # This file
+└── PROJECT-SPEC.md
 ```
+
+### Layer Responsibilities
+
+| Layer | Location | Responsibility |
+|-------|----------|----------------|
+| **Domain** | `domain/ports/` | Interfaces (ports) for external dependencies |
+| **Application** | `app/` | Use case logic, state definitions, node logic |
+| **Infrastructure** | `infra/` | Framework-specific adapters (LangGraph, OpenAI, pgvector) |
+
+### Why Graphs in `infra/`?
+
+The graph definitions (`StateGraph`, `add_edge`, `compile`) are **LangGraph-specific**, just like `ChatOpenAI` is OpenAI-specific. The **node logic** in `app/workflow/nodes/` is framework-agnostic and could theoretically be reused with a different orchestration framework.
 
 ---
 
